@@ -664,7 +664,174 @@ public class ArticleExample
         Contents.RestoreGraphicsState();
 		return;
 		}
+
+
+
+
+
+
+    private void DrawFormPai
+                (
+                PdfContents Contents
+                )
+    {
+        // Order form simulation
+        // Define constants to make the code readable
+        // Define constants
+        const Double Width = 3.05;
+        const Double Height = 7.65;
+        const Double Margin = 0.04;
+        const Double FontSize = 9.0;
+        Double LineSpacing = ArialNormal.LineSpacing(FontSize);
+        Double Descent = ArialNormal.Descent(FontSize);
+        Double ColWidth1 = ArialNormal.TextWidth(FontSize, "9999.99") + 2 * Margin;
+        Double ColWidth2 = ArialNormal.TextWidth(FontSize, "Qty") + 2 * Margin;
+        Double Col4LinePosX = Width - ColWidth1;
+        Double Col3LinePosX = Col4LinePosX - ColWidth2;
+        Double Col2LinePosX = Col3LinePosX - ColWidth1;
+
+
+        /////Text of header of table
+        Double Col1TextPosX = Margin;
+        Double Col2TextPosX = Col3LinePosX - Margin;
+        Double Col3TextPosX = Col4LinePosX - Margin;
+        Double Col4TextPosX = Width - Margin;
+
+        // save graphics state
+        Contents.SaveGraphicsState();
+
+        // form line width 0.01"
+        Contents.SetLineWidth(0.01);
+
+        // Initial vertical position for contents
+        Double PosY1 = Height - LineSpacing - 2 * Margin;
+
+        // bottom of the contents area of the form
+        Double PosY2 = 2 * Margin + 3 * LineSpacing;
+
+        // shift origin, bottom left of the form to X=4.35" and Y=1.1"
+        /// Set Position of all contents ******
+        Contents.Translate(1, 5);
+
+        // draw outline rectangle
+        Contents.DrawRectangle(0.0, 0.0, 6.25, 6.25, PaintOp.CloseStroke);
+
+        // draw two horizontal lines. under table heading and above total
+        Contents.DrawLine(0, 6, 6.25, 6);
+
+        Contents.DrawLine(1, 0, 1, 6);
+        Contents.DrawLine(2, 0, 2, 6);
+
+
+        //   Contents.DrawLine(0, PosY2, Width, PosY2);
+
+        // draw three vertical lines separating the column
+        Contents.DrawLine(Col2LinePosX, Height, Col2LinePosX, PosY2);
+        Contents.DrawLine(Col3LinePosX, Height, Col3LinePosX, PosY2);
+        Contents.DrawLine(Col4LinePosX, Height, Col4LinePosX, 0);
+
+        // draw table heading
+        Double PosY = PosY1 + Margin + Descent;
+        Contents.DrawText(ArialNormal, FontSize, Col1TextPosX, PosY, "Description");
+        Contents.DrawText(ArialNormal, FontSize, Col2TextPosX, PosY, TextJustify.Right, "Price");
+        Contents.DrawText(ArialNormal, FontSize, Col3TextPosX, PosY, TextJustify.Right, "Qty");
+        Contents.DrawText(ArialNormal, FontSize, Col4TextPosX, PosY, TextJustify.Right, "Total");
+
+        // reset order total
+        Double Total = 0;
+
+        // define text box for book title and author
+        TextBox Box = new TextBox(Col2LinePosX - 2 * Margin);
+
+        // initial vertical position
+        PosY = PosY1 - Margin;
+
+        // loop for all items in the order
+        // Order class is a atabase simulation for this example
+        foreach (Order Book in Order.OrderList)
+        {
+            // clear the text box
+            Box.Clear();
+
+            // add book title and authors to the box
+            Box.AddText(ArialNormal, FontSize, Book.Title);
+            Box.AddText(ArialNormal, FontSize, ". By: ");
+            Box.AddText(ArialNormal, FontSize, Book.Authors);
+
+            // draw the title and authors.
+            // on exit, PosY will be for next line
+            Contents.DrawText(Col1TextPosX, ref PosY, PosY2, 0, Box);
+
+            // move PosY up to allow drawing cost on the same line as the last text line of the box
+            PosY += Descent;
+
+            // draw price quantity and item's total
+            Contents.DrawText(ArialNormal, FontSize, Col2TextPosX, PosY, TextJustify.Right, Book.Price.ToString("#.00"));
+            Contents.DrawText(ArialNormal, FontSize, Col3TextPosX, PosY, TextJustify.Right, Book.Qty.ToString());
+            Contents.DrawText(ArialNormal, FontSize, Col4TextPosX, PosY, TextJustify.Right, Book.Total.ToString("#.00"));
+
+            // update PosY for next item
+            PosY -= Descent + 0.5 * LineSpacing;
+
+            // accumulate total
+            Total += Book.Total;
+        }
+
+        // draw total before tax
+        PosY = PosY2 - Margin - ArialNormal.Ascent(FontSize);
+        Contents.DrawText(ArialNormal, FontSize, Col3TextPosX, PosY, TextJustify.Right, "Total before tax");
+        Contents.DrawText(ArialNormal, FontSize, Col4TextPosX, PosY, TextJustify.Right, Total.ToString("#.00"));
+
+        // draw tax (Ontario Canada HST)
+        PosY -= LineSpacing;
+        Contents.DrawText(ArialNormal, FontSize, Col3TextPosX, PosY, TextJustify.Right, "Tax (13%)");
+        Double Tax = Math.Round(0.13 * Total, 2, MidpointRounding.AwayFromZero);
+        Contents.DrawText(ArialNormal, FontSize, Col4TextPosX, PosY, TextJustify.Right, Tax.ToString("#.00"));
+
+        // draw final total
+        PosY -= LineSpacing;
+        Contents.DrawText(ArialNormal, FontSize, Col3TextPosX, PosY, TextJustify.Right, "Total payable");
+        Total += Tax;
+        Contents.DrawText(ArialNormal, FontSize, Col4TextPosX, PosY, TextJustify.Right, Total.ToString("#.00"));
+
+        // restore graphics state
+        Contents.RestoreGraphicsState();
+        return;
+    }
+
+    private void DrawPicturePai
+            (
+            PdfDocument Document,
+            PdfContents Contents
+            )
+    {
+        // define local image resources
+        PdfImage Image1 = new PdfImage(Document, "D:\\visual studio 2012\\TestPDFFileWriter\\TestPDFFileWriter\\logo.png");
+
+        // image size will be limited to 1.4" by 1.4"
+        SizeD ImageSize = Image1.ImageSize(1.4, 1.4);
+
+        // save graphics state
+        Contents.SaveGraphicsState();
+
+        // translate coordinate origin to the center of the picture
+        Contents.Translate(3.36, 5.7);
+
+        // clipping path
+        //   Contents.DrawOval(-ImageSize.Width / 2, -ImageSize.Height / 2, ImageSize.Width, ImageSize.Height, PaintOp.ClipPathEor);
+
+        // draw image
+        Contents.DrawImage(Image1, -ImageSize.Width / 2, -ImageSize.Height / 2, ImageSize.Width, ImageSize.Height);
+
+        // restore graphics state
+        Contents.RestoreGraphicsState();
+        return;
+    }
 	}
+
+
+
+        
 
 // Simulation of book order database
 public class Order
