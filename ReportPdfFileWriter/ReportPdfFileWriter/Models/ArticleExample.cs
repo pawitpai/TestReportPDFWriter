@@ -15,8 +15,6 @@ namespace TestPdfFileWriter
         private PdfFont ArialBoldItalic;
         private PdfFont TimesNormal;
         private PdfFont Comic;
-        private PdfFont Tahoma;
-        private PdfTilingPattern WaterMark;
 
         WeeklyReport weeklyreport = new WeeklyReport();
 
@@ -95,7 +93,6 @@ namespace TestPdfFileWriter
             ArialBoldItalic = new PdfFont(Document, "Arial", FontStyle.Bold | FontStyle.Italic, true);
             TimesNormal = new PdfFont(Document, "Times New Roman", FontStyle.Regular, true);
             Comic = new PdfFont(Document, "Comic Sans MS", FontStyle.Bold, true);
-            Tahoma = new PdfFont(Document, "Tahoma", FontStyle.Bold, true);
 
             // substitute one character for another
             // this program supports characters 32 to 126 and 160 to 255
@@ -139,36 +136,21 @@ namespace TestPdfFileWriter
                 PdfContents Contents
                 )
         {
-
-
-            // Order form simulation
-            // Define constants to make the code readable
-            // Define constants
             const Double Width = 6.25;
             const Double CenterWidth = 3.15;
-            Double Heigh = 11.75 -2.2;
-            //Double Heighttable = 0.2+(weeklyreport.Months.Count * 0.2);
+            const Double Heigh = 11.75 - 2.25;
             Double HeightTableData = 0.2 + (weeklyreport.Months.Count * 0.2);
             const Double Margin = 0.04;
             const Double FontSize = 9.0;
             const Double FontSizebig = 14.0;
             Double LineSpacing = ArialNormal.LineSpacing(FontSize);
             Double Descent = ArialNormal.Descent(FontSize);
-            //Double ColWidth1 = 1.5 + 2 * Margin;
-            //Double ColWidth2 = 1.5 + 2 * Margin;
-
-            //Double Col3LinePosX = Width - ColWidth1;
-            //Double Col2LinePosX = Col3LinePosX - ColWidth2;
-
-            //Double Col1TextPosX = Margin;
-            //Double Col2TextPosX = Col3LinePosX - Margin;
-            //Double Col3TextPosX = Width - Margin;
-
+            
             // save graphics state
             Contents.SaveGraphicsState();
 
             // form line width 0.01"
-            Contents.SetLineWidth(0.001);
+            Contents.SetLineWidth(0.01);
             //Contents.SetColorStroking(Color.Black);
             // Initial vertical position for contents
             //Double PosY1 = Height - LineSpacing - 2 * Margin;
@@ -177,30 +159,24 @@ namespace TestPdfFileWriter
             //Double PosY2 = 2 * Margin + 3 * LineSpacing;
 
             // shift origin, bottom left of the form to X=4.35" and Y=1.1"กำหนดจุด X Y เริ่มต้น
-            //Contents.Translate(4.35, 1.1);
+            Contents.Translate(1, Heigh-1.5);
+            //Contents.Translate(1, 8);
 
-            //Contents.Translate(1, Heigh);
-            Contents.Translate(1, 8);
-
-            Contents.DrawText(Tahoma, FontSizebig, CenterWidth, 1.5, TextJustify.Center, weeklyreport.ReportName);
+            Contents.DrawText(ArialBold, FontSizebig, CenterWidth, 1.5, TextJustify.Center, weeklyreport.ReportName);
 
             // draw outline rectangle
-            //Contents.DrawRectangle(0.0, 0.0, Width, Height, PaintOp.CloseStroke);
             Contents.DrawRectangle(0, 0, Width, HeightTableData, PaintOp.CloseStroke);
 
             // draw two horizontal lines. under table heading and above total
-            //Contents.DrawLine(0, PosY1, Width, PosY1);
-            //Contents.DrawLine(0, PosY2, Width, PosY2);
-            Contents.SetLineWidth(0.01);
+            Contents.SetLineWidth(0.02);
             Contents.DrawLine(0, HeightTableData - 0.2, Width, HeightTableData - 0.2);
 
             // draw three vertical lines separating the columns
-            Contents.SetLineWidth(0.001);
+            Contents.SetLineWidth(0.01);
             Contents.DrawLine(0 + 3.25, HeightTableData, 0 + 3.25, 0);
             Contents.DrawLine(0 + 3.25 + 1.5, HeightTableData, 0 + 3.25 + 1.5, 0);
 
             // draw table heading
-            //Double PosY = PosY1 + Margin + Descent;
             Contents.DrawText(ArialBold, FontSize, (double)(0 + 3.25) / 2 - Margin, HeightTableData - 0.2 + Margin, TextJustify.Center, weeklyreport.LabelMonth);
             Contents.DrawText(ArialBold, FontSize, 0 + 3.25 + 1.5 - Margin, HeightTableData - 0.2 + Margin, TextJustify.Right, weeklyreport.LabelRevenue);
             Contents.DrawText(ArialBold, FontSize, 0 + 3.25 + 1.5 + 1.5 - Margin, HeightTableData - 0.2 + Margin, TextJustify.Right, weeklyreport.LabelForecast);
