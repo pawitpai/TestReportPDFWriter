@@ -22,7 +22,7 @@ namespace ReportPdfFileWriter.Controllers
             //ViewData["Message"] = "Press Button to download report (pdf)";
             //return View();
             ArticleExample AE = new ArticleExample();
-            AE.Test(false, "D:\\Rsc\\ReportPdfFileWriter\\ReportPdfFileWriter\\ReportPdfFileWriter\\ReportPdfFileWriterWeeklyReportpdf.pdf");
+            AE.Test(false, HttpRuntime.AppDomainAppPath + "\\ReportPdfFileWriterWeeklyReportpdf.pdf", weeklyreport);
             return View();
         }
 
