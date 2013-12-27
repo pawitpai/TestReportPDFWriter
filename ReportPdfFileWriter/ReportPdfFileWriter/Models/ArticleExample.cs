@@ -18,11 +18,7 @@ namespace TestPdfFileWriter
 
         WeeklyReport weeklyreport = new WeeklyReport();
 
-        public void Test
-                (
-                Boolean Debug,
-                String FileName
-                )
+        public void Test(Boolean Debug, String FileName)
         {
             WeeklyreportTempList();
             // Step 1: Create empty document
@@ -50,14 +46,7 @@ namespace TestPdfFileWriter
             PdfContents Contents = new PdfContents(Page);
 
             // Step 5: add graphices and text contents to the contents object
-            //DrawFrameAndBackgroundWaterMark(Contents);
-            //DrawTwoLinesOfHeading(Contents);
-            //DrawHappyFace(Contents);
-            //DrawBrickPattern(Document, Contents);
             DrawLogo(Document, Contents);
-            //DrawHeart(Contents);
-            //DrawStar(Contents);
-            //DrawTextBox(Contents);
             DrawForm(Contents);
 
             // Step 6: create pdf file
@@ -77,10 +66,7 @@ namespace TestPdfFileWriter
         // Define Font Resources
         ////////////////////////////////////////////////////////////////////
 
-        private void DefineFontResources
-                (
-                PdfDocument Document
-                )
+        private void DefineFontResources(PdfDocument Document)
         {
             // Define font resources
             // Arguments: PdfDocument class, font family name, font style, embed flag
@@ -99,14 +85,11 @@ namespace TestPdfFileWriter
             // if a font has a character outside these ranges that is required by the application,
             // you can replace an unused character with this character
             ArialNormal.CharSubstitution(9679, 9679, 164);
+            //ArialNormal.CharSubstitution(3585, 3675, 164);
             return;
         }
 
-        private void DrawLogo
-                (
-                PdfDocument Document,
-                PdfContents Contents
-                )
+        private void DrawLogo(PdfDocument Document, PdfContents Contents)
         {
             // define local image resources
             PdfImage Image1 = new PdfImage(Document, weeklyreport.Logo);
@@ -131,79 +114,72 @@ namespace TestPdfFileWriter
             return;
         }
       
-        private void DrawForm
-                (
-                PdfContents Contents
-                )
+        private void DrawForm(PdfContents Contents)
         {
             const Double Width = 6.25;
             const Double CenterWidth = 3.15;
-            const Double Heigh = 11.75 - 2.25;
-            Double HeightTableData = 0.2 + (weeklyreport.Months.Count * 0.2);
+            const Double Heigh = 11.75 - 2.25;//9.5
+            double HeightReportName = 1.5;
+            double HeightRow = 0.2;
+            Double HeightTableData = HeightRow + (weeklyreport.Months.Count * HeightRow);
             const Double Margin = 0.04;
             const Double FontSize = 9.0;
             const Double FontSizebig = 14.0;
-            Double LineSpacing = ArialNormal.LineSpacing(FontSize);
-            Double Descent = ArialNormal.Descent(FontSize);
             
             // save graphics state
             Contents.SaveGraphicsState();
 
-            // form line width 0.01"
+            Contents.Translate(1, Heigh);//Heigh9.5
+
+            //ReportName
+            Contents.DrawText(ArialBold, FontSizebig, CenterWidth, 0, TextJustify.Center, weeklyreport.ReportName);
+            
+            // draw outline rectangle//Heigh8
             Contents.SetLineWidth(0.01);
-            //Contents.SetColorStroking(Color.Black);
-            // Initial vertical position for contents
-            //Double PosY1 = Height - LineSpacing - 2 * Margin;
+            Contents.DrawRectangle(0, 0 - HeightReportName, Width, HeightTableData, PaintOp.CloseStroke);
 
-            // bottom of the contents area of the form
-            //Double PosY2 = 2 * Margin + 3 * LineSpacing;
+            Double PosY1 = HeightTableData- HeightReportName;
+            Double PosY2 = 0 - HeightReportName;
+            Double PosX1 = 0 + 3.25;
+            Double PosX2 = 0 + 3.25 + 1.5;
+            Double PosX3 = 0 + 3.25 + 1.5 + 1.5;
+            Contents.SetLineWidth(0.01);
 
-            // shift origin, bottom left of the form to X=4.35" and Y=1.1"กำหนดจุด X Y เริ่มต้น
-            Contents.Translate(1, Heigh-1.5);
-            //Contents.Translate(1, 8);
+            Contents.DrawLine(PosX1, PosY1, PosX1, PosY2);
+            Contents.DrawLine(PosX2, PosY1, PosX2, PosY2);
 
-            Contents.DrawText(ArialBold, FontSizebig, CenterWidth, 1.5, TextJustify.Center, weeklyreport.ReportName);
+            PosY1 = PosY1 - HeightRow;
 
-            // draw outline rectangle
-            Contents.DrawRectangle(0, 0, Width, HeightTableData, PaintOp.CloseStroke);
-
-            // draw two horizontal lines. under table heading and above total
             Contents.SetLineWidth(0.02);
-            Contents.DrawLine(0, HeightTableData - 0.2, Width, HeightTableData - 0.2);
-
-            // draw three vertical lines separating the columns
-            Contents.SetLineWidth(0.01);
-            Contents.DrawLine(0 + 3.25, HeightTableData, 0 + 3.25, 0);
-            Contents.DrawLine(0 + 3.25 + 1.5, HeightTableData, 0 + 3.25 + 1.5, 0);
+            Contents.DrawLine(0, PosY1, Width, HeightTableData - HeightRow - HeightReportName);
 
             // draw table heading
-            Contents.DrawText(ArialBold, FontSize, (double)(0 + 3.25) / 2 - Margin, HeightTableData - 0.2 + Margin, TextJustify.Center, weeklyreport.LabelMonth);
-            Contents.DrawText(ArialBold, FontSize, 0 + 3.25 + 1.5 - Margin, HeightTableData - 0.2 + Margin, TextJustify.Right, weeklyreport.LabelRevenue);
-            Contents.DrawText(ArialBold, FontSize, 0 + 3.25 + 1.5 + 1.5 - Margin, HeightTableData - 0.2 + Margin, TextJustify.Right, weeklyreport.LabelForecast);
+            Contents.SetLineWidth(0.01);
+            Contents.DrawText(ArialBold, FontSize, PosX1 / 2 - Margin, PosY1 + Margin, TextJustify.Center, weeklyreport.LabelMonth);
+            Contents.DrawText(ArialBold, FontSize, PosX2 - Margin, PosY1 + Margin, TextJustify.Right, weeklyreport.LabelRevenue);
+            Contents.DrawText(ArialBold, FontSize, PosX3 - Margin, PosY1 + Margin, TextJustify.Right, weeklyreport.LabelForecast);
 
-            Double PosY = HeightTableData - 0.2;
-
-             int i = 1;
+            int i = 1;
 
             foreach (MonthData item in weeklyreport.Months)
             {
-               PosY -= 0.2;
+               PosY1 -= 0.2;
                if (weeklyreport.Months.Count != i)
                {
-                   Contents.DrawLine(0, PosY, Width, PosY);
+                   Contents.DrawLine(0, PosY1, Width, PosY1);
                }
 
-               Contents.DrawText(ArialBold, FontSize, (double)(0 + 3.25) / 2 - Margin, PosY + Margin, TextJustify.Center, item.Month);
-               Contents.DrawText(ArialNormal, FontSize, 0 + 3.25 + 1.5 - Margin, PosY + Margin, TextJustify.Right,"$ "+ item.Revenue.ToString("#,###,###,###"));
-               Contents.DrawText(ArialNormal, FontSize, 0 + 3.25 + 1.5 + 1.5 - Margin, PosY + Margin, TextJustify.Right, "$ " + item.Forecast.ToString("#,###,###,###"));
+               Contents.DrawText(ArialBold, FontSize, PosX1 / 2 - Margin, PosY1 + Margin, TextJustify.Center, item.Month);
+               Contents.DrawText(ArialNormal, FontSize, PosX2 - Margin, PosY1 + Margin, TextJustify.Right, "$ " + item.Revenue.ToString("#,###,###,###"));
+               Contents.DrawText(ArialNormal, FontSize, PosX3 - Margin, PosY1 + Margin, TextJustify.Right, "$ " + item.Forecast.ToString("#,###,###,###"));
 
                i += 1;
             }
 
-            PosY -= 0.5;
-            Contents.DrawText(ArialNormal, FontSize, 0 + 3.25 + 1.5 + 1.5 - Margin, PosY, TextJustify.Right, weeklyreport.LabelFooter);
-            PosY -= 0.2;
-            Contents.DrawText(ArialNormal, FontSize, 0 + 3.25 + 1.5 + 1.5 - Margin, PosY, TextJustify.Right, weeklyreport.GeneratedOn.ToString("MMMM dd, yyyy"));
+            PosY1 -= 0.5;
+            Contents.DrawText(ArialNormal, FontSize, PosX3 - Margin, PosY1, TextJustify.Right, weeklyreport.LabelFooter);
+            PosY1 -= 0.2;
+            Contents.DrawText(ArialNormal, FontSize, PosX3 - Margin, PosY1, TextJustify.Right, weeklyreport.GeneratedOn.ToString("MMMM dd, yyyy"));
             // restore graphics state
             Contents.RestoreGraphicsState();
             return;
